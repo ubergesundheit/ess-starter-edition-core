@@ -1,0 +1,100 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - build-container-image
+      - patch-1
+    tags:
+      - v**
+  pull_request:
+    branches:
+      - main
+      - build-container-image
+      - patch-1
+
+jobs:
+  build-operator:
+    name: Build operator container image
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and push container image
+        uses: bCyberGmbH/build-container-image-action@main
+        with:
+          registry_username: ${{ github.repository_owner }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_repository: ${{ github.repository }}/operator
+          dockerfile_path: Dockerfile
+          build_context: "."
+          #push_to_registry: ${{ github.event_name != 'pull_request' }}
+          push_to_registry: true
+
+  build-operator-webhook:
+    name: Build operator webhook container image
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and push container image
+        uses: bCyberGmbH/build-container-image-action@main
+        with:
+          registry_username: ${{ github.repository_owner }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_repository: ${{ github.repository }}/operator-conversion-webhook
+          dockerfile_path: conversion/Dockerfile.operator
+          build_context: "conversion/"
+          #push_to_registry: ${{ github.event_name != 'pull_request' }}
+          push_to_registry: true
+
+  build-updater:
+    name: Build updater container image
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and push container image
+        uses: bCyberGmbH/build-container-image-action@main
+        with:
+          registry_username: ${{ github.repository_owner }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_repository: ${{ github.repository }}/updater
+          dockerfile_path: Dockerfile.updater
+          build_context: "."
+          #push_to_registry: ${{ github.event_name != 'pull_request' }}
+          push_to_registry: true
+
+  build-updater-webhook:
+    name: Build updater webhook container image
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and push container image
+        uses: bCyberGmbH/build-container-image-action@main
+        with:
+          registry_username: ${{ github.repository_owner }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_repository: ${{ github.repository }}/updater-conversion-webhook
+          dockerfile_path: conversion/Dockerfile.updater
+          build_context: "conversion/"
+          #push_to_registry: ${{ github.event_name != 'pull_request' }}
+          push_to_registry: true
